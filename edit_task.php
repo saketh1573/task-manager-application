@@ -59,7 +59,22 @@
                 die("Connection failed: " . $conn->connect_error);
             }
 
-            $sql = "UPDATE tasks SET title='$title', description='$description', deadline='$deadline', priority='$priority', category='$category' WHERE id=$taskId";
+// Prepare the SQL statement
+$sql = "UPDATE tasks SET title=?, description=?, deadline=?, priority=?, category=? WHERE id=?";
+$stmt = $conn->prepare($sql);
+
+// Bind parameters and execute the statement
+if ($stmt->bind_param("sssssi", $_POST['title'], $_POST['description'], $_POST['deadline'], $_POST['priority'], $_POST['category'], $_POST['task_id']) && $stmt->execute()) {
+    echo "Task updated successfully.";
+    // Redirect back to task detail page
+    header("Location: task_detail.php?id=" . $_POST['task_id']);
+    exit;
+} else {
+    echo "Error updating task: " . $stmt->error;
+}
+
+// Close the statement
+$stmt->close();
 
             if ($conn->query($sql) === TRUE) {
                 echo "Task updated successfully.";
